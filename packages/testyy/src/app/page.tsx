@@ -1,104 +1,221 @@
-import Image from "next/image";
-import Link from "next/link";
+'use client';
 
-export default function Home() {
+import { useState } from 'react';
+
+export default function Calculator() {
+  const [display, setDisplay] = useState('0');
+  const [previousValue, setPreviousValue] = useState<number | null>(null);
+  const [operation, setOperation] = useState<string | null>(null);
+  const [waitingForOperand, setWaitingForOperand] = useState(false);
+
+  const inputNumber = (num: string) => {
+    if (waitingForOperand) {
+      setDisplay(num);
+      setWaitingForOperand(false);
+    } else {
+      setDisplay(display === '0' ? num : display + num);
+    }
+  };
+
+  const inputOperation = (nextOperation: string) => {
+    const inputValue = parseFloat(display);
+
+    if (previousValue === null) {
+      setPreviousValue(inputValue);
+    } else if (operation) {
+      const currentValue = previousValue || 0;
+      const newValue = calculate(currentValue, inputValue, operation);
+
+      setDisplay(String(newValue));
+      setPreviousValue(newValue);
+    }
+
+    setWaitingForOperand(true);
+    setOperation(nextOperation);
+  };
+
+  const calculate = (firstValue: number, secondValue: number, operation: string): number => {
+    switch (operation) {
+      case '+':
+        return firstValue + secondValue;
+      case '-':
+        return firstValue - secondValue;
+      case '×':
+        return firstValue * secondValue;
+      case '÷':
+        return firstValue / secondValue;
+      case '=':
+        return secondValue;
+      default:
+        return secondValue;
+    }
+  };
+
+  const performCalculation = () => {
+    const inputValue = parseFloat(display);
+
+    if (previousValue !== null && operation) {
+      const newValue = calculate(previousValue, inputValue, operation);
+      setDisplay(String(newValue));
+      setPreviousValue(null);
+      setOperation(null);
+      setWaitingForOperand(true);
+    }
+  };
+
+  const clear = () => {
+    setDisplay('0');
+    setPreviousValue(null);
+    setOperation(null);
+    setWaitingForOperand(false);
+  };
+
+  const inputDecimal = () => {
+    if (waitingForOperand) {
+      setDisplay('0.');
+      setWaitingForOperand(false);
+    } else if (display.indexOf('.') === -1) {
+      setDisplay(display + '.');
+    }
+  };
+
   return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
-
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <Link
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </Link>
-          <Link
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </Link>
+    <div className="min-h-screen bg-gradient-to-br from-orange-100 to-orange-200 flex items-center justify-center p-4">
+      <div className="bg-white rounded-3xl shadow-2xl p-6 w-full max-w-sm">
+        {/* Header */}
+        <div className="text-center mb-6">
+          <h1 className="text-2xl font-bold text-orange-600 mb-2">🍊 Orange Calculator</h1>
+          <p className="text-orange-500 text-sm">Simple & Sweet</p>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <Link
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </Link>
-        <Link
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </Link>
-        <Link
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </Link>
-      </footer>
+
+        {/* Display */}
+        <div className="bg-gradient-to-r from-orange-50 to-orange-100 rounded-2xl p-4 mb-6 border-2 border-orange-200">
+          <div className="text-right text-3xl font-mono font-bold text-orange-800 min-h-[40px] flex items-center justify-end">
+            {display}
+          </div>
+        </div>
+
+        {/* Button Grid */}
+        <div className="grid grid-cols-4 gap-3">
+          {/* Row 1 */}
+          <button
+            onClick={clear}
+            className="col-span-2 bg-orange-500 hover:bg-orange-600 text-white font-bold py-4 px-4 rounded-xl transition-all duration-200 transform hover:scale-105 active:scale-95 shadow-lg"
+          >
+            Clear
+          </button>
+          <button
+            onClick={() => inputOperation('÷')}
+            className="bg-orange-400 hover:bg-orange-500 text-white font-bold py-4 px-4 rounded-xl transition-all duration-200 transform hover:scale-105 active:scale-95 shadow-lg"
+          >
+            ÷
+          </button>
+          <button
+            onClick={() => inputOperation('×')}
+            className="bg-orange-400 hover:bg-orange-500 text-white font-bold py-4 px-4 rounded-xl transition-all duration-200 transform hover:scale-105 active:scale-95 shadow-lg"
+          >
+            ×
+          </button>
+
+          {/* Row 2 */}
+          <button
+            onClick={() => inputNumber('7')}
+            className="bg-orange-100 hover:bg-orange-200 text-orange-800 font-bold py-4 px-4 rounded-xl transition-all duration-200 transform hover:scale-105 active:scale-95 shadow-lg border border-orange-300"
+          >
+            7
+          </button>
+          <button
+            onClick={() => inputNumber('8')}
+            className="bg-orange-100 hover:bg-orange-200 text-orange-800 font-bold py-4 px-4 rounded-xl transition-all duration-200 transform hover:scale-105 active:scale-95 shadow-lg border border-orange-300"
+          >
+            8
+          </button>
+          <button
+            onClick={() => inputNumber('9')}
+            className="bg-orange-100 hover:bg-orange-200 text-orange-800 font-bold py-4 px-4 rounded-xl transition-all duration-200 transform hover:scale-105 active:scale-95 shadow-lg border border-orange-300"
+          >
+            9
+          </button>
+          <button
+            onClick={() => inputOperation('-')}
+            className="bg-orange-400 hover:bg-orange-500 text-white font-bold py-4 px-4 rounded-xl transition-all duration-200 transform hover:scale-105 active:scale-95 shadow-lg"
+          >
+            -
+          </button>
+
+          {/* Row 3 */}
+          <button
+            onClick={() => inputNumber('4')}
+            className="bg-orange-100 hover:bg-orange-200 text-orange-800 font-bold py-4 px-4 rounded-xl transition-all duration-200 transform hover:scale-105 active:scale-95 shadow-lg border border-orange-300"
+          >
+            4
+          </button>
+          <button
+            onClick={() => inputNumber('5')}
+            className="bg-orange-100 hover:bg-orange-200 text-orange-800 font-bold py-4 px-4 rounded-xl transition-all duration-200 transform hover:scale-105 active:scale-95 shadow-lg border border-orange-300"
+          >
+            5
+          </button>
+          <button
+            onClick={() => inputNumber('6')}
+            className="bg-orange-100 hover:bg-orange-200 text-orange-800 font-bold py-4 px-4 rounded-xl transition-all duration-200 transform hover:scale-105 active:scale-95 shadow-lg border border-orange-300"
+          >
+            6
+          </button>
+          <button
+            onClick={() => inputOperation('+')}
+            className="bg-orange-400 hover:bg-orange-500 text-white font-bold py-4 px-4 rounded-xl transition-all duration-200 transform hover:scale-105 active:scale-95 shadow-lg"
+          >
+            +
+          </button>
+
+          {/* Row 4 */}
+          <button
+            onClick={() => inputNumber('1')}
+            className="bg-orange-100 hover:bg-orange-200 text-orange-800 font-bold py-4 px-4 rounded-xl transition-all duration-200 transform hover:scale-105 active:scale-95 shadow-lg border border-orange-300"
+          >
+            1
+          </button>
+          <button
+            onClick={() => inputNumber('2')}
+            className="bg-orange-100 hover:bg-orange-200 text-orange-800 font-bold py-4 px-4 rounded-xl transition-all duration-200 transform hover:scale-105 active:scale-95 shadow-lg border border-orange-300"
+          >
+            2
+          </button>
+          <button
+            onClick={() => inputNumber('3')}
+            className="bg-orange-100 hover:bg-orange-200 text-orange-800 font-bold py-4 px-4 rounded-xl transition-all duration-200 transform hover:scale-105 active:scale-95 shadow-lg border border-orange-300"
+          >
+            3
+          </button>
+          <button
+            onClick={performCalculation}
+            className="row-span-2 bg-gradient-to-b from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-bold py-4 px-4 rounded-xl transition-all duration-200 transform hover:scale-105 active:scale-95 shadow-lg"
+          >
+            =
+          </button>
+
+          {/* Row 5 */}
+          <button
+            onClick={() => inputNumber('0')}
+            className="col-span-2 bg-orange-100 hover:bg-orange-200 text-orange-800 font-bold py-4 px-4 rounded-xl transition-all duration-200 transform hover:scale-105 active:scale-95 shadow-lg border border-orange-300"
+          >
+            0
+          </button>
+          <button
+            onClick={inputDecimal}
+            className="bg-orange-100 hover:bg-orange-200 text-orange-800 font-bold py-4 px-4 rounded-xl transition-all duration-200 transform hover:scale-105 active:scale-95 shadow-lg border border-orange-300"
+          >
+            .
+          </button>
+        </div>
+
+        {/* Footer */}
+        <div className="text-center mt-6">
+          <p className="text-orange-400 text-xs">Made with 🧡 for calculations</p>
+        </div>
+      </div>
     </div>
   );
 }
+
